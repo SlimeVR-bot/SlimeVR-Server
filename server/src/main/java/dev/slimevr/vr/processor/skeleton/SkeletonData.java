@@ -1,12 +1,8 @@
 package dev.slimevr.vr.processor.skeleton;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import dev.slimevr.vr.processor.TransformNode;
+
+import java.util.*;
 
 
 /**
@@ -107,8 +103,8 @@ public class SkeletonData {
 		// #endregion
 
 		// #region Assemble skeleton arms from chest
-		chestJoint.attachJoint(leftShoulderJoint, BoneType.LEFT_SHOULDER);
-		chestJoint.attachJoint(rightShoulderJoint, BoneType.RIGHT_SHOULDER);
+		chestJoint.attachJoint(leftShoulderJoint, BoneType.LEFT_SHOULDER_TAIL);
+		chestJoint.attachJoint(rightShoulderJoint, BoneType.RIGHT_SHOULDER_TAIL);
 
 		leftShoulderJoint.attachJoint(leftElbowJoint, BoneType.LEFT_LOWER_ARM);
 		rightShoulderJoint.attachJoint(rightElbowJoint, BoneType.RIGHT_LOWER_ARM);

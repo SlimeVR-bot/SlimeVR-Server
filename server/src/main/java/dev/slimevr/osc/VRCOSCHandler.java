@@ -8,7 +8,7 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import dev.slimevr.VRServer;
-import dev.slimevr.config.OSCConfig;
+import dev.slimevr.config.VRCOSCConfig;
 import dev.slimevr.platform.SteamVRBridge;
 import dev.slimevr.vr.processor.HumanPoseProcessor;
 import dev.slimevr.vr.trackers.HMDTracker;
@@ -29,14 +29,13 @@ import java.util.List;
 public class VRCOSCHandler implements OSCHandler {
 	private OSCPortIn oscReceiver;
 	private OSCPortOut oscSender;
-	private OSCMessage oscMessage;
-	private final OSCConfig config;
+	private final VRCOSCConfig config;
 	private final VRServer server;
 	private final HMDTracker hmd;
 	private final SteamVRBridge steamvrBridge;
 	private final HumanPoseProcessor humanPoseProcessor;
 	private final List<? extends ShareableTracker> shareableTrackers;
-	private final FastList<Float> oscArgs = new FastList<>(3);
+	private final FastList<Float> oscArgs = new FastList<>();
 	private final Vector3f vec = new Vector3f();
 	private final Quaternion quatBuf = new Quaternion();
 	private final Vector3f vecBuf1 = new Vector3f();
@@ -54,7 +53,7 @@ public class VRCOSCHandler implements OSCHandler {
 		HMDTracker hmd,
 		HumanPoseProcessor humanPoseProcessor,
 		SteamVRBridge steamvrBridge,
-		OSCConfig oscConfig,
+		VRCOSCConfig oscConfig,
 		List<? extends ShareableTracker> shareableTrackers
 	) {
 		this.server = server;
@@ -214,70 +213,71 @@ public class VRCOSCHandler implements OSCHandler {
 
 		// Send OSC data
 		if (oscSender != null && oscSender.isConnected()) {
+			// Create new OSC Bundle
+			OSCBundle oscBundle = new OSCBundle();
+
 			for (int i = 0; i < shareableTrackers.size(); i++) {
 				if (trackersEnabled[i]) {
-					// Send regular trackers' positions
+					// Add regular trackers' positions
 					shareableTrackers.get(i).getPosition(vec);
 					oscArgs.clear();
 					oscArgs.add(vec.x);
 					oscArgs.add(vec.y);
 					oscArgs.add(-vec.z);
-					oscMessage = new OSCMessage(
-						"/tracking/trackers/" + (i + 1) + "/position",
-						oscArgs
-					);
-					try {
-						oscSender.send(oscMessage);
-					} catch (IOException | OSCSerializeException e) {
-						// Avoid spamming AsynchronousCloseException too many
-						// times per second
-						if (currentTime - timeAtLastError > 100) {
-							timeAtLastError = System.currentTimeMillis();
-							LogManager
-								.warning(
-									"[VRCOSCHandler] Error sending OSC message to VRChat: "
-										+ e
-								);
-						}
-					}
+					oscBundle
+						.addPacket(
+							new OSCMessage(
+								"/tracking/trackers/" + (i + 1) + "/position",
+								oscArgs
+							)
+						);
 
-					// Send regular trackers' rotations
+					// Add regular trackers' rotations
 					shareableTrackers.get(i).getRotation(quatBuf);
 					float[] floatBuf = quatToUnityAngles(quatBuf);
 					oscArgs.clear();
 					oscArgs.add(floatBuf[0] * FastMath.RAD_TO_DEG);
 					oscArgs.add(floatBuf[1] * FastMath.RAD_TO_DEG);
 					oscArgs.add(floatBuf[2] * FastMath.RAD_TO_DEG);
-
-					oscMessage = new OSCMessage(
-						"/tracking/trackers/" + (i + 1) + "/rotation",
-						oscArgs
-					);
-					try {
-						oscSender.send(oscMessage);
-					} catch (IOException | OSCSerializeException e) {
-						// Don't do anything.
-						// Previous code already logs the exception.
-					}
+					oscBundle
+						.addPacket(
+							new OSCMessage(
+								"/tracking/trackers/" + (i + 1) + "/rotation",
+								oscArgs
+							)
+						);
 				}
 
 				if (shareableTrackers.get(i).getTrackerRole() == TrackerRole.HEAD) {
-					// Send HMD position
+					// Add HMD position
 					shareableTrackers.get(i).getPosition(vec);
 					oscArgs.clear();
 					oscArgs.add(vec.x);
 					oscArgs.add(vec.y);
 					oscArgs.add(-vec.z);
-					oscMessage = new OSCMessage(
-						"/tracking/trackers/head/position",
-						oscArgs
-					);
-					try {
-						oscSender.send(oscMessage);
-					} catch (IOException | OSCSerializeException e) {
-						// Don't do anything.
-						// Previous code already logs the exception.
-					}
+					oscBundle
+						.addPacket(
+							new OSCMessage(
+								"/tracking/trackers/head/position",
+								oscArgs
+							)
+						);
+				}
+			}
+
+			// Send OSC packets as bundle
+			try {
+				oscSender.send(oscBundle);
+			} catch (IOException | OSCSerializeException e) {
+				// Avoid spamming AsynchronousCloseException too many
+				// times per second
+				if (currentTime - timeAtLastError > 100) {
+					timeAtLastError = System.currentTimeMillis();
+					LogManager
+						.warning(
+							"[VRCOSCHandler] Error sending OSC packets to VRChat: "
+								+ e
+						);
 				}
 			}
 		}
@@ -296,7 +296,7 @@ public class VRCOSCHandler implements OSCHandler {
 					oscArgs.add(0f);
 					oscArgs.add(-hmdYawQuatBuf.getYaw() * FastMath.RAD_TO_DEG);
 					oscArgs.add(0f);
-					oscMessage = new OSCMessage(
+					OSCMessage oscMessage = new OSCMessage(
 						"/tracking/trackers/head/rotation",
 						oscArgs
 					);
@@ -304,7 +304,7 @@ public class VRCOSCHandler implements OSCHandler {
 						oscSender.send(oscMessage);
 					} catch (IOException | OSCSerializeException e) {
 						LogManager
-							.warning("[VRCOSCHandler] Error sending OSC message to VRChat: " + e);
+							.warning("[VRCOSCHandler] Error sending OSC packet to VRChat: " + e);
 					}
 				}
 			}

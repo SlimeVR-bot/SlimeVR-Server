@@ -10,6 +10,7 @@ import dev.slimevr.vr.processor.ComputedHumanPoseTrackerPosition;
 import dev.slimevr.vr.processor.TransformNode;
 import dev.slimevr.vr.trackers.*;
 import io.eiren.util.collections.FastList;
+import io.eiren.util.logging.LogManager;
 
 import java.util.List;
 import java.util.Map;
@@ -21,47 +22,47 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 	public final SkeletonConfig skeletonConfig;
 	// #region Upper body nodes (torso)
 	// @formatter:off
-	protected final TransformNode hmdNode = new TransformNode("HMD", false);
-	protected final TransformNode headNode = new TransformNode("Head", false);
-	protected final TransformNode trackerHeadNode = new TransformNode("Head-Tracker", false);
-	protected final TransformNode neckNode = new TransformNode("Neck", false);
-	protected final TransformNode chestNode = new TransformNode("Chest", false);
-	protected final TransformNode trackerChestNode = new TransformNode("Chest-Tracker", false);
-	protected final TransformNode waistNode = new TransformNode("Waist", false);
-	protected final TransformNode hipNode = new TransformNode("Hip", false);
-	protected final TransformNode trackerWaistNode = new TransformNode("Waist-Tracker", false);
+	protected final TransformNode hmdNode = new TransformNode(BoneType.HMD.name(), false);
+	protected final TransformNode headNode = new TransformNode(BoneType.HEAD.name(), false);
+	protected final TransformNode trackerHeadNode = new TransformNode(BoneType.HEAD_TRACKER.name(), false);
+	protected final TransformNode neckNode = new TransformNode(BoneType.NECK.name(), false);
+	protected final TransformNode chestNode = new TransformNode(BoneType.CHEST.name(), false);
+	protected final TransformNode trackerChestNode = new TransformNode(BoneType.CHEST_TRACKER.name(), false);
+	protected final TransformNode waistNode = new TransformNode(BoneType.WAIST.name(), false);
+	protected final TransformNode hipNode = new TransformNode(BoneType.HIP.name(), false);
+	protected final TransformNode trackerHipNode = new TransformNode(BoneType.HIP_TRACKER.name(), false);
 	// #endregion
 	// #region Lower body nodes (legs)
-	protected final TransformNode leftHipNode = new TransformNode("Left-Hip", false);
-	protected final TransformNode leftKneeNode = new TransformNode("Left-Knee", false);
-	protected final TransformNode trackerLeftKneeNode = new TransformNode("Left-Knee-Tracker", false);
-	protected final TransformNode leftAnkleNode = new TransformNode("Left-Ankle", false);
-	protected final TransformNode leftFootNode = new TransformNode("Left-Foot", false);
-	protected final TransformNode trackerLeftFootNode = new TransformNode("Left-Foot-Tracker", false);
-	protected final TransformNode rightHipNode = new TransformNode("Right-Hip", false);
-	protected final TransformNode rightKneeNode = new TransformNode("Right-Knee", false);
-	protected final TransformNode trackerRightKneeNode = new TransformNode("Right-Knee-Tracker", false);
-	protected final TransformNode rightAnkleNode = new TransformNode("Right-Ankle", false);
-	protected final TransformNode rightFootNode = new TransformNode("Right-Foot", false);
-	protected final TransformNode trackerRightFootNode = new TransformNode("Right-Foot-Tracker", false);
+	protected final TransformNode leftHipNode = new TransformNode(BoneType.LEFT_HIP.name(), false);
+	protected final TransformNode leftKneeNode = new TransformNode(BoneType.LEFT_UPPER_LEG.name(), false);
+	protected final TransformNode trackerLeftKneeNode = new TransformNode(BoneType.LEFT_KNEE_TRACKER.name(), false);
+	protected final TransformNode leftAnkleNode = new TransformNode(BoneType.LEFT_LOWER_LEG.name(), false);
+	protected final TransformNode leftFootNode = new TransformNode(BoneType.LEFT_FOOT.name(), false);
+	protected final TransformNode trackerLeftFootNode = new TransformNode(BoneType.LEFT_FOOT_TRACKER.name(), false);
+	protected final TransformNode rightHipNode = new TransformNode(BoneType.RIGHT_HIP.name(), false);
+	protected final TransformNode rightKneeNode = new TransformNode(BoneType.RIGHT_UPPER_LEG.name(), false);
+	protected final TransformNode trackerRightKneeNode = new TransformNode(BoneType.RIGHT_KNEE_TRACKER.name(), false);
+	protected final TransformNode rightAnkleNode = new TransformNode(BoneType.RIGHT_LOWER_LEG.name(), false);
+	protected final TransformNode rightFootNode = new TransformNode(BoneType.RIGHT_FOOT.name(), false);
+	protected final TransformNode trackerRightFootNode = new TransformNode(BoneType.RIGHT_FOOT_TRACKER.name(), false);
 	// #endregion
 	// #region Arms
-	protected final TransformNode leftShoulderHeadNode = new TransformNode("Left-Shoulder-Head", false);
-	protected final TransformNode rightShoulderHeadNode = new TransformNode("Right-Shoulder-Head", false);
-	protected final TransformNode leftShoulderTailNode = new TransformNode("Left-Shoulder-Tail", false);
-	protected final TransformNode rightShoulderTailNode = new TransformNode("Right-Shoulder-Tail", false);
-	protected final TransformNode leftElbowNode = new TransformNode("Left-Elbow", false);
-	protected final TransformNode rightElbowNode = new TransformNode("Right-Elbow", false);
-	protected final TransformNode trackerLeftElbowNode = new TransformNode("Left-Elbow-Tracker", false);
-	protected final TransformNode trackerRightElbowNode = new TransformNode("Right-Elbow-Tracker", false);
-	protected final TransformNode leftWristNode = new TransformNode("Left-Wrist", false);
-	protected final TransformNode rightWristNode = new TransformNode("Right-Wrist", false);
-	protected final TransformNode leftHandNode = new TransformNode("Left-Hand", false);
-	protected final TransformNode rightHandNode = new TransformNode("Right-Hand", false);
-	protected final TransformNode trackerLeftHandNode = new TransformNode("Left-Hand-Tracker", false);
-	protected final TransformNode trackerRightHandNode = new TransformNode("Right-Hand-Tracker", false);
-	protected final TransformNode leftControllerNode = new TransformNode("Left-Controller", false);
-	protected final TransformNode rightControllerNode = new TransformNode("Right-Controller", false);
+	protected final TransformNode leftShoulderHeadNode = new TransformNode(BoneType.LEFT_SHOULDER_HEAD.name(), false);
+	protected final TransformNode rightShoulderHeadNode = new TransformNode(BoneType.RIGHT_SHOULDER_HEAD.name(), false);
+	protected final TransformNode leftShoulderTailNode = new TransformNode(BoneType.LEFT_SHOULDER_TAIL.name(), false);
+	protected final TransformNode rightShoulderTailNode = new TransformNode(BoneType.RIGHT_SHOULDER_TAIL.name(), false);
+	protected final TransformNode leftElbowNode = new TransformNode(BoneType.LEFT_UPPER_ARM.name(), false);
+	protected final TransformNode rightElbowNode = new TransformNode(BoneType.RIGHT_UPPER_ARM.name(), false);
+	protected final TransformNode trackerLeftElbowNode = new TransformNode(BoneType.LEFT_ELBOW_TRACKER.name(), false);
+	protected final TransformNode trackerRightElbowNode = new TransformNode(BoneType.RIGHT_ELBOW_TRACKER.name(), false);
+	protected final TransformNode leftWristNode = new TransformNode(BoneType.LEFT_LOWER_ARM.name(), false);
+	protected final TransformNode rightWristNode = new TransformNode(BoneType.RIGHT_LOWER_ARM.name(), false);
+	protected final TransformNode leftHandNode = new TransformNode(BoneType.LEFT_HAND.name(), false);
+	protected final TransformNode rightHandNode = new TransformNode(BoneType.RIGHT_HAND.name(), false);
+	protected final TransformNode trackerLeftHandNode = new TransformNode(BoneType.LEFT_HAND_TRACKER.name(), false);
+	protected final TransformNode trackerRightHandNode = new TransformNode(BoneType.RIGHT_HAND_TRACKER.name(), false);
+	protected final TransformNode leftControllerNode = new TransformNode(BoneType.LEFT_CONTROLLER.name(), false);
+	protected final TransformNode rightControllerNode = new TransformNode(BoneType.RIGHT_CONTROLLER.name(), false);
 	// @formatter:on
 	// #endregion
 	// #region Buffers
@@ -246,7 +247,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 		// #region Attach tracker nodes for tracker offsets
 		neckNode.attachChild(trackerHeadNode);
 		chestNode.attachChild(trackerChestNode);
-		hipNode.attachChild(trackerWaistNode);
+		hipNode.attachChild(trackerHipNode);
 
 		leftKneeNode.attachChild(trackerLeftKneeNode);
 		rightKneeNode.attachChild(trackerRightKneeNode);
@@ -401,8 +402,8 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			currentBoneInfo
 				.add(
 					new BoneInfo(
-						BoneType.LEFT_SHOULDER,
-						getTailNodeOfBone(BoneType.LEFT_SHOULDER)
+						BoneType.LEFT_SHOULDER_TAIL,
+						getTailNodeOfBone(BoneType.LEFT_SHOULDER_TAIL)
 					)
 				);
 		}
@@ -452,8 +453,8 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			currentBoneInfo
 				.add(
 					new BoneInfo(
-						BoneType.RIGHT_SHOULDER,
-						getTailNodeOfBone(BoneType.RIGHT_SHOULDER)
+						BoneType.RIGHT_SHOULDER_TAIL,
+						getTailNodeOfBone(BoneType.RIGHT_SHOULDER_TAIL)
 					)
 				);
 		}
@@ -501,11 +502,14 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 
 	// #region Set trackers inputs
 	public void setTrackersFromList(List<? extends Tracker> trackers) {
-		this.hmdTracker = TrackerUtils
-			.findNonComputedHumanPoseTrackerForBodyPosition(
-				trackers,
-				TrackerPosition.HMD
-			);
+		this.hmdTracker = TrackerUtils.getHMDTracker(trackers);
+		if (hmdTracker == null) {
+			this.hmdTracker = TrackerUtils
+				.findNonComputedHumanPoseTrackerForBodyPosition(
+					trackers,
+					TrackerPosition.HMD
+				);
+		}
 		this.leftControllerTracker = TrackerUtils
 			.findNonComputedHumanPoseTrackerForBodyPosition(
 				trackers,
@@ -631,7 +635,6 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 	}
 
 	public void setTrackersFromServer(VRServer server) {
-		this.hmdTracker = server.hmdTracker;
 		setTrackersFromList(server.getAllTrackers());
 	}
 
@@ -887,7 +890,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 				.getRotation(rotBuf1);
 			waistNode.localTransform.setRotation(rotBuf1);
 			hipNode.localTransform.setRotation(rotBuf1);
-			trackerWaistNode.localTransform.setRotation(rotBuf1);
+			trackerHipNode.localTransform.setRotation(rotBuf1);
 		} else if (hmdTracker != null) {
 			// Align with last tracker's yaw (HMD or neck)
 			rotBuf1.fromAngles(0, rotBuf1.getYaw(), 0);
@@ -897,7 +900,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			chestNode.localTransform.setRotation(rotBuf1);
 			waistNode.localTransform.setRotation(rotBuf1);
 			hipNode.localTransform.setRotation(rotBuf1);
-			trackerWaistNode.localTransform.setRotation(rotBuf1);
+			trackerHipNode.localTransform.setRotation(rotBuf1);
 		}
 
 		// Left Leg
@@ -1051,7 +1054,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 
 					waistNode.localTransform.setRotation(rotBuf3);
 					hipNode.localTransform.setRotation(rotBuf3);
-					trackerWaistNode.localTransform.setRotation(rotBuf3);
+					trackerHipNode.localTransform.setRotation(rotBuf3);
 				} else if (chestTracker != null) {
 					// Calculates hip from chest + legs
 					leftHipNode.localTransform.getRotation(rotBuf1);
@@ -1076,7 +1079,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 
 					waistNode.localTransform.setRotation(rotBuf3);
 					hipNode.localTransform.setRotation(rotBuf3);
-					trackerWaistNode.localTransform.setRotation(rotBuf3);
+					trackerHipNode.localTransform.setRotation(rotBuf3);
 				}
 			}
 		}
@@ -1091,7 +1094,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 
 			rotBuf3.slerpLocal(rotBuf1, hipLegsAveraging);
 			hipNode.localTransform.setRotation(rotBuf3);
-			trackerWaistNode.localTransform.setRotation(rotBuf3);
+			trackerHipNode.localTransform.setRotation(rotBuf3);
 		}
 
 		// Left arm
@@ -1266,8 +1269,8 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 		}
 
 		if (computedWaistTracker != null) {
-			computedWaistTracker.position.set(trackerWaistNode.worldTransform.getTranslation());
-			computedWaistTracker.rotation.set(trackerWaistNode.worldTransform.getRotation());
+			computedWaistTracker.position.set(trackerHipNode.worldTransform.getTranslation());
+			computedWaistTracker.rotation.set(trackerHipNode.worldTransform.getRotation());
 			computedWaistTracker.dataTick();
 		}
 
@@ -1408,7 +1411,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 				hipNode.localTransform.setTranslation(offset);
 				break;
 			case HIP_TRACKER:
-				trackerWaistNode.localTransform.setTranslation(offset);
+				trackerHipNode.localTransform.setTranslation(offset);
 				break;
 			case LEFT_HIP:
 				leftHipNode.localTransform.setTranslation(offset);
@@ -1441,10 +1444,10 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 				trackerLeftFootNode.localTransform.setTranslation(offset);
 				trackerRightFootNode.localTransform.setTranslation(offset);
 				break;
-			case LEFT_SHOULDER:
+			case LEFT_SHOULDER_TAIL:
 				leftShoulderTailNode.localTransform.setTranslation(offset);
 				break;
-			case RIGHT_SHOULDER:
+			case RIGHT_SHOULDER_TAIL:
 				rightShoulderTailNode.localTransform.setTranslation(offset);
 				break;
 			case LEFT_UPPER_ARM:
@@ -1497,6 +1500,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 		}
 	}
 
+	@Override
 	public TransformNode getTailNodeOfBone(BoneType bone) {
 		if (bone == null) {
 			return null;
@@ -1516,7 +1520,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			case HIP:
 				return hipNode;
 			case HIP_TRACKER:
-				return trackerWaistNode;
+				return trackerHipNode;
 			case LEFT_HIP:
 				return leftHipNode;
 			case RIGHT_HIP:
@@ -1541,9 +1545,9 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 				return trackerLeftFootNode;
 			case RIGHT_FOOT_TRACKER:
 				return trackerRightFootNode;
-			case LEFT_SHOULDER:
+			case LEFT_SHOULDER_TAIL:
 				return leftShoulderTailNode;
-			case RIGHT_SHOULDER:
+			case RIGHT_SHOULDER_TAIL:
 				return rightShoulderTailNode;
 			case LEFT_UPPER_ARM:
 				return leftElbowNode;
@@ -1591,7 +1595,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			trackerChestNode,
 			waistNode,
 			hipNode,
-			trackerWaistNode,
+			trackerHipNode,
 			leftHipNode,
 			leftKneeNode,
 			trackerLeftKneeNode,
@@ -1731,6 +1735,135 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			case UPPER_ARM_LENGTH -> skeletonConfig
 				.setOffset(SkeletonConfigOffsets.UPPER_ARM_LENGTH, null);
 		}
+	}
+
+	@Override
+	public Vector3f getTranslationBetweenBones(BoneType bone, BoneType root, boolean unity) {
+		Vector3f vecBuf = new Vector3f();
+		TransformNode headNode = getTailNodeOfBone(bone);
+		TransformNode secondNode = getTailNodeOfBone(root);
+
+		headNode.worldTransform.getTranslation(vecBuf);
+
+		while (secondNode.getParent() != null && secondNode.getParent() != headNode) {
+			secondNode = secondNode.getParent();
+
+			vecBuf
+				.addLocal(
+					secondNode.worldTransform
+						.getTranslation()
+						.subtract(secondNode.getParent().worldTransform.getTranslation())
+				);
+
+			// LogManager.debug(secondNode.getName());
+		}
+
+		return vecBuf;
+	}
+
+	/**
+	 * @param bone Bone from which we want the translation
+	 * @param root The new root for offsetting the translation
+	 * @param unity Only use bones from Unity's HumanBodyBones
+	 * @return The bone's local translation relative to a new root
+	 */
+	@Override
+	public Vector3f getLocalBoneTranslationFromRoot(BoneType bone, BoneType root, boolean unity) {
+		// TODO : Fix this shit
+		TransformNode boneNode = getTailNodeOfBone(bone);
+		TransformNode rootNode = getTailNodeOfBone(root);
+		TransformNode towardsNode = getNodeTowards(boneNode, rootNode, unity);
+
+		if (bone == root) {
+			return new Vector3f().zero();
+		} else if (towardsNode != null) {
+			return boneNode.worldTransform
+				.getTranslation()
+				.subtract(towardsNode.worldTransform.getTranslation());
+		} else {
+			return boneNode.worldTransform
+				.getTranslation()
+				.subtract(
+					boneNode.getParent().getParent().worldTransform.getTranslation()
+				);
+		}
+	}
+
+	/**
+	 * @param bone Bone from which we want the rotation
+	 * @param root The new root for offsetting the rotation
+	 * @param unity Only use bones from Unity's HumanBodyBones
+	 * @return The bone's local rotation relative to a new root
+	 */
+	@Override
+	public Quaternion getLocalBoneRotationFromRoot(BoneType bone, BoneType root, boolean unity) {
+		TransformNode boneNode = getTailNodeOfBone(bone);
+		TransformNode rootNode = getTailNodeOfBone(root);
+		TransformNode towardsNode = getNodeTowards(boneNode, rootNode, unity);
+		if (bone == root) {
+			return boneNode.worldTransform.getRotation();
+		} else if (towardsNode != null) {
+			return boneNode.worldTransform
+				.getRotation()
+				.mult(towardsNode.worldTransform.getRotation().inverse());
+		} else if (hasInParents(boneNode, rootNode)) {
+			return boneNode.worldTransform
+				.getRotation()
+				.mult(
+					boneNode.getParent().getParent().worldTransform.getRotation().inverse()
+				);
+		} else {
+			return boneNode.localTransform
+				.getRotation();
+		}
+	}
+
+	/**
+	 * @param from The root of the search
+	 * @param towards The goal of the search
+	 * @param unity Only use bones from Unity's HumanBodyBones
+	 * @return the first child node towards "towards", or null if "towards" is
+	 * not present anywhere in the children of "from".
+	 */
+	protected TransformNode getNodeTowards(
+		TransformNode from,
+		TransformNode towards,
+		boolean unity
+	) {
+		FastList<TransformNode> searching = new FastList<>(from.children);
+		int i = 0;
+		while (i < searching.size()) {
+			if (searching.get(i).getName().equalsIgnoreCase(towards.getName())) {
+				if (unity) {
+					if (
+						UnityBone
+							.getByBoneType(BoneType.valueOf(searching.get(i).getParent().getName()))
+							!= null
+					) {
+						return searching.get(i);
+					} else {
+						return searching.get(i).getParent();
+					}
+				} else {
+					return searching.get(i);
+				}
+			}
+			searching.addAll(searching.get(i).children);
+			i++;
+		}
+		LogManager.debug(String.valueOf(searching.size()));
+		return null;
+	}
+
+	private boolean hasInParents(TransformNode from, TransformNode towards) {
+		TransformNode searchingNode;
+		searchingNode = from;
+		while (searchingNode.getParent() != null && searchingNode.getParent() != towards) {
+			searchingNode = searchingNode.getParent();
+			if (searchingNode.getParent() == towards)
+				return true;
+		}
+		return false;
 	}
 
 	/**

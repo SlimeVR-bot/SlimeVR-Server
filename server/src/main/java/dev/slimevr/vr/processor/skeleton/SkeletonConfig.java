@@ -327,13 +327,13 @@ public class SkeletonConfig {
 				-getOffset(SkeletonConfigOffsets.UPPER_ARM_LENGTH),
 				0
 			);
-			case LEFT_SHOULDER -> setNodeOffset(
+			case LEFT_SHOULDER_TAIL -> setNodeOffset(
 				nodeOffset,
 				-getOffset(SkeletonConfigOffsets.SHOULDERS_WIDTH) / 2f,
 				-getOffset(SkeletonConfigOffsets.SHOULDERS_DISTANCE),
 				0
 			);
-			case RIGHT_SHOULDER -> setNodeOffset(
+			case RIGHT_SHOULDER_TAIL -> setNodeOffset(
 				nodeOffset,
 				getOffset(SkeletonConfigOffsets.SHOULDERS_WIDTH) / 2f,
 				-getOffset(SkeletonConfigOffsets.SHOULDERS_DISTANCE),
