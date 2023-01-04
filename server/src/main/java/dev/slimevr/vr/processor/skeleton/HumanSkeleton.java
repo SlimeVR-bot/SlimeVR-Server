@@ -10,7 +10,6 @@ import dev.slimevr.vr.processor.ComputedHumanPoseTrackerPosition;
 import dev.slimevr.vr.processor.TransformNode;
 import dev.slimevr.vr.trackers.*;
 import io.eiren.util.collections.FastList;
-import io.eiren.util.logging.LogManager;
 
 import java.util.List;
 import java.util.Map;
@@ -311,28 +310,36 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 		currentBoneInfo.clear();
 
 		// Head
-		currentBoneInfo.add(new BoneInfo(BoneType.HEAD, getTailNodeOfBone(BoneType.HEAD)));
-		currentBoneInfo.add(new BoneInfo(BoneType.NECK, getTailNodeOfBone(BoneType.NECK)));
+		currentBoneInfo.add(new BoneInfo(BoneType.HEAD.bodyPart, getTailNodeOfBone(BoneType.HEAD)));
+		currentBoneInfo.add(new BoneInfo(BoneType.NECK.bodyPart, getTailNodeOfBone(BoneType.NECK)));
 
 		// Spine and legs
 		if (hasSpineTracker || hasLeftLegTracker || hasRightLegTracker || sendAllBones) {
 			// Spine
-			currentBoneInfo.add(new BoneInfo(BoneType.CHEST, getTailNodeOfBone(BoneType.CHEST)));
-			currentBoneInfo.add(new BoneInfo(BoneType.WAIST, getTailNodeOfBone(BoneType.WAIST)));
-			currentBoneInfo.add(new BoneInfo(BoneType.HIP, getTailNodeOfBone(BoneType.HIP)));
+			currentBoneInfo
+				.add(new BoneInfo(BoneType.CHEST.bodyPart, getTailNodeOfBone(BoneType.CHEST)));
+			currentBoneInfo
+				.add(new BoneInfo(BoneType.WAIST.bodyPart, getTailNodeOfBone(BoneType.WAIST)));
+			currentBoneInfo
+				.add(new BoneInfo(BoneType.HIP.bodyPart, getTailNodeOfBone(BoneType.HIP)));
 
 			// Left leg
 			if (hasLeftLegTracker || sendAllBones) {
 				if (sendAllBones) {
 					// don't send currently
 					currentBoneInfo
-						.add(new BoneInfo(BoneType.LEFT_HIP, getTailNodeOfBone(BoneType.LEFT_HIP)));
+						.add(
+							new BoneInfo(
+								BoneType.LEFT_HIP.bodyPart,
+								getTailNodeOfBone(BoneType.LEFT_HIP)
+							)
+						);
 				}
 
 				currentBoneInfo
 					.add(
 						new BoneInfo(
-							BoneType.LEFT_UPPER_LEG,
+							BoneType.LEFT_UPPER_LEG.bodyPart,
 							getTailNodeOfBone(BoneType.LEFT_UPPER_LEG)
 						)
 					);
@@ -340,7 +347,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 				currentBoneInfo
 					.add(
 						new BoneInfo(
-							BoneType.LEFT_LOWER_LEG,
+							BoneType.LEFT_LOWER_LEG.bodyPart,
 							getTailNodeOfBone(BoneType.LEFT_LOWER_LEG)
 						)
 					);
@@ -348,7 +355,10 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 				if (leftFootTracker != null || sendAllBones) {
 					currentBoneInfo
 						.add(
-							new BoneInfo(BoneType.LEFT_FOOT, getTailNodeOfBone(BoneType.LEFT_FOOT))
+							new BoneInfo(
+								BoneType.LEFT_FOOT.bodyPart,
+								getTailNodeOfBone(BoneType.LEFT_FOOT)
+							)
 						);
 				}
 			}
@@ -359,14 +369,17 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 					// don't send currently
 					currentBoneInfo
 						.add(
-							new BoneInfo(BoneType.RIGHT_HIP, getTailNodeOfBone(BoneType.RIGHT_HIP))
+							new BoneInfo(
+								BoneType.RIGHT_HIP.bodyPart,
+								getTailNodeOfBone(BoneType.RIGHT_HIP)
+							)
 						);
 				}
 
 				currentBoneInfo
 					.add(
 						new BoneInfo(
-							BoneType.RIGHT_UPPER_LEG,
+							BoneType.RIGHT_UPPER_LEG.bodyPart,
 							getTailNodeOfBone(BoneType.RIGHT_UPPER_LEG)
 						)
 					);
@@ -374,7 +387,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 				currentBoneInfo
 					.add(
 						new BoneInfo(
-							BoneType.RIGHT_LOWER_LEG,
+							BoneType.RIGHT_LOWER_LEG.bodyPart,
 							getTailNodeOfBone(BoneType.RIGHT_LOWER_LEG)
 						)
 					);
@@ -383,7 +396,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 					currentBoneInfo
 						.add(
 							new BoneInfo(
-								BoneType.RIGHT_FOOT,
+								BoneType.RIGHT_FOOT.bodyPart,
 								getTailNodeOfBone(BoneType.RIGHT_FOOT)
 							)
 						);
@@ -402,7 +415,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			currentBoneInfo
 				.add(
 					new BoneInfo(
-						BoneType.LEFT_SHOULDER_TAIL,
+						BoneType.LEFT_SHOULDER_TAIL.bodyPart,
 						getTailNodeOfBone(BoneType.LEFT_SHOULDER_TAIL)
 					)
 				);
@@ -412,7 +425,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			currentBoneInfo
 				.add(
 					new BoneInfo(
-						BoneType.LEFT_UPPER_ARM,
+						BoneType.LEFT_UPPER_ARM.bodyPart,
 						getTailNodeOfBone(BoneType.LEFT_UPPER_ARM)
 					)
 				);
@@ -421,7 +434,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			currentBoneInfo
 				.add(
 					new BoneInfo(
-						BoneType.LEFT_LOWER_ARM,
+						BoneType.LEFT_LOWER_ARM.bodyPart,
 						getTailNodeOfBone(BoneType.LEFT_LOWER_ARM)
 					)
 				);
@@ -431,7 +444,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			currentBoneInfo
 				.add(
 					new BoneInfo(
-						BoneType.LEFT_HAND,
+						BoneType.LEFT_HAND.bodyPart,
 						getTailNodeOfBone(BoneType.LEFT_HAND)
 					)
 				);
@@ -441,7 +454,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			currentBoneInfo
 				.add(
 					new BoneInfo(
-						BoneType.LEFT_CONTROLLER,
+						BoneType.LEFT_CONTROLLER.bodyPart,
 						getTailNodeOfBone(BoneType.LEFT_CONTROLLER)
 					)
 				);
@@ -453,7 +466,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			currentBoneInfo
 				.add(
 					new BoneInfo(
-						BoneType.RIGHT_SHOULDER_TAIL,
+						BoneType.RIGHT_SHOULDER_TAIL.bodyPart,
 						getTailNodeOfBone(BoneType.RIGHT_SHOULDER_TAIL)
 					)
 				);
@@ -463,7 +476,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			currentBoneInfo
 				.add(
 					new BoneInfo(
-						BoneType.RIGHT_UPPER_ARM,
+						BoneType.RIGHT_UPPER_ARM.bodyPart,
 						getTailNodeOfBone(BoneType.RIGHT_UPPER_ARM)
 					)
 				);
@@ -472,7 +485,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			currentBoneInfo
 				.add(
 					new BoneInfo(
-						BoneType.RIGHT_LOWER_ARM,
+						BoneType.RIGHT_LOWER_ARM.bodyPart,
 						getTailNodeOfBone(BoneType.RIGHT_LOWER_ARM)
 					)
 				);
@@ -482,7 +495,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			currentBoneInfo
 				.add(
 					new BoneInfo(
-						BoneType.RIGHT_HAND,
+						BoneType.RIGHT_HAND.bodyPart,
 						getTailNodeOfBone(BoneType.RIGHT_HAND)
 					)
 				);
@@ -492,7 +505,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			currentBoneInfo
 				.add(
 					new BoneInfo(
-						BoneType.RIGHT_CONTROLLER,
+						BoneType.RIGHT_CONTROLLER.bodyPart,
 						getTailNodeOfBone(BoneType.RIGHT_CONTROLLER)
 					)
 				);
@@ -1577,6 +1590,16 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 
 		return null;
 	}
+
+	@Override
+	public BoneInfo getBoneInfoForBodyPart(int bodyPart) {
+		for (BoneInfo bone : currentBoneInfo) {
+			if (bone.bodyPart == bodyPart)
+				return bone;
+		}
+
+		return null;
+	}
 	// #endregion
 
 	@Override
@@ -1735,135 +1758,6 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			case UPPER_ARM_LENGTH -> skeletonConfig
 				.setOffset(SkeletonConfigOffsets.UPPER_ARM_LENGTH, null);
 		}
-	}
-
-	@Override
-	public Vector3f getTranslationBetweenBones(BoneType bone, BoneType root, boolean unity) {
-		Vector3f vecBuf = new Vector3f();
-		TransformNode headNode = getTailNodeOfBone(bone);
-		TransformNode secondNode = getTailNodeOfBone(root);
-
-		headNode.worldTransform.getTranslation(vecBuf);
-
-		while (secondNode.getParent() != null && secondNode.getParent() != headNode) {
-			secondNode = secondNode.getParent();
-
-			vecBuf
-				.addLocal(
-					secondNode.worldTransform
-						.getTranslation()
-						.subtract(secondNode.getParent().worldTransform.getTranslation())
-				);
-
-			// LogManager.debug(secondNode.getName());
-		}
-
-		return vecBuf;
-	}
-
-	/**
-	 * @param bone Bone from which we want the translation
-	 * @param root The new root for offsetting the translation
-	 * @param unity Only use bones from Unity's HumanBodyBones
-	 * @return The bone's local translation relative to a new root
-	 */
-	@Override
-	public Vector3f getLocalBoneTranslationFromRoot(BoneType bone, BoneType root, boolean unity) {
-		// TODO : Fix this shit
-		TransformNode boneNode = getTailNodeOfBone(bone);
-		TransformNode rootNode = getTailNodeOfBone(root);
-		TransformNode towardsNode = getNodeTowards(boneNode, rootNode, unity);
-
-		if (bone == root) {
-			return new Vector3f().zero();
-		} else if (towardsNode != null) {
-			return boneNode.worldTransform
-				.getTranslation()
-				.subtract(towardsNode.worldTransform.getTranslation());
-		} else {
-			return boneNode.worldTransform
-				.getTranslation()
-				.subtract(
-					boneNode.getParent().getParent().worldTransform.getTranslation()
-				);
-		}
-	}
-
-	/**
-	 * @param bone Bone from which we want the rotation
-	 * @param root The new root for offsetting the rotation
-	 * @param unity Only use bones from Unity's HumanBodyBones
-	 * @return The bone's local rotation relative to a new root
-	 */
-	@Override
-	public Quaternion getLocalBoneRotationFromRoot(BoneType bone, BoneType root, boolean unity) {
-		TransformNode boneNode = getTailNodeOfBone(bone);
-		TransformNode rootNode = getTailNodeOfBone(root);
-		TransformNode towardsNode = getNodeTowards(boneNode, rootNode, unity);
-		if (bone == root) {
-			return boneNode.worldTransform.getRotation();
-		} else if (towardsNode != null) {
-			return boneNode.worldTransform
-				.getRotation()
-				.mult(towardsNode.worldTransform.getRotation().inverse());
-		} else if (hasInParents(boneNode, rootNode)) {
-			return boneNode.worldTransform
-				.getRotation()
-				.mult(
-					boneNode.getParent().getParent().worldTransform.getRotation().inverse()
-				);
-		} else {
-			return boneNode.localTransform
-				.getRotation();
-		}
-	}
-
-	/**
-	 * @param from The root of the search
-	 * @param towards The goal of the search
-	 * @param unity Only use bones from Unity's HumanBodyBones
-	 * @return the first child node towards "towards", or null if "towards" is
-	 * not present anywhere in the children of "from".
-	 */
-	protected TransformNode getNodeTowards(
-		TransformNode from,
-		TransformNode towards,
-		boolean unity
-	) {
-		FastList<TransformNode> searching = new FastList<>(from.children);
-		int i = 0;
-		while (i < searching.size()) {
-			if (searching.get(i).getName().equalsIgnoreCase(towards.getName())) {
-				if (unity) {
-					if (
-						UnityBone
-							.getByBoneType(BoneType.valueOf(searching.get(i).getParent().getName()))
-							!= null
-					) {
-						return searching.get(i);
-					} else {
-						return searching.get(i).getParent();
-					}
-				} else {
-					return searching.get(i);
-				}
-			}
-			searching.addAll(searching.get(i).children);
-			i++;
-		}
-		LogManager.debug(String.valueOf(searching.size()));
-		return null;
-	}
-
-	private boolean hasInParents(TransformNode from, TransformNode towards) {
-		TransformNode searchingNode;
-		searchingNode = from;
-		while (searchingNode.getParent() != null && searchingNode.getParent() != towards) {
-			searchingNode = searchingNode.getParent();
-			if (searchingNode.getParent() == towards)
-				return true;
-		}
-		return false;
 	}
 
 	/**

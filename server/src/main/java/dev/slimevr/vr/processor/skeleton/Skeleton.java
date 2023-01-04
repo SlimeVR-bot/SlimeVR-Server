@@ -1,7 +1,5 @@
 package dev.slimevr.vr.processor.skeleton;
 
-import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
 import dev.slimevr.util.ann.VRServerThread;
 import dev.slimevr.vr.processor.TransformNode;
 import io.eiren.util.ann.ThreadSafe;
@@ -36,25 +34,9 @@ public abstract class Skeleton {
 		}
 	}
 
+	public abstract BoneInfo getBoneInfoForBodyPart(int bodyPart);
+
 	public abstract TransformNode getTailNodeOfBone(BoneType bone);
-
-	public abstract Vector3f getLocalBoneTranslationFromRoot(
-		BoneType bone,
-		BoneType root,
-		boolean unity
-	);
-
-	public abstract Quaternion getLocalBoneRotationFromRoot(
-		BoneType bone,
-		BoneType root,
-		boolean unity
-	);
-
-	public abstract Vector3f getTranslationBetweenBones(
-			BoneType bone,
-			BoneType root,
-			boolean unity
-	);
 
 	@VRServerThread
 	public abstract void resetTrackersFull();

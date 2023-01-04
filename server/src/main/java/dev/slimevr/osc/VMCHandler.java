@@ -10,11 +10,14 @@ import com.jme3.math.Vector3f;
 import dev.slimevr.VRServer;
 import dev.slimevr.config.VMCConfig;
 import dev.slimevr.vr.processor.HumanPoseProcessor;
+import dev.slimevr.vr.processor.TransformNode;
+import dev.slimevr.vr.processor.skeleton.BoneInfo;
 import dev.slimevr.vr.processor.skeleton.BoneType;
 import dev.slimevr.vr.processor.skeleton.Skeleton;
 import dev.slimevr.vr.trackers.UnityBone;
 import io.eiren.util.collections.FastList;
 import io.eiren.util.logging.LogManager;
+import solarxr_protocol.datatypes.BodyPart;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -99,7 +102,7 @@ public class VMCHandler implements OSCHandler {
 			if (oscReceiver != null) {
 				OSCMessageListener listener = this::handleReceivedMessage;
 				MessageSelector selector = new OSCPatternAddressMessageSelector(
-					"/VMC/*"
+					"/VMC//"
 				);
 				oscReceiver.getDispatcher().addListener(selector, listener);
 				oscReceiver.startListening();
@@ -179,7 +182,24 @@ public class VMCHandler implements OSCHandler {
 					vecBuf.zero();
 				} else {
 					// Head anchor
-					vecBuf.set(skeleton.getTranslationBetweenBones(BoneType.HEAD, BoneType.HIP, true));
+					vecBuf.zero();
+					TransformNode headNode = skeleton.getTailNodeOfBone(BoneType.HEAD);
+					TransformNode secondNode = skeleton.getTailNodeOfBone(BoneType.HIP);
+
+					headNode.worldTransform.getTranslation(vecBuf);
+
+					while (secondNode.getParent() != null && secondNode.getParent() != headNode) {
+						secondNode = secondNode.getParent();
+
+						vecBuf
+							.addLocal(
+								secondNode.worldTransform
+									.getTranslation()
+									.subtract(
+										secondNode.getParent().worldTransform.getTranslation()
+									)
+							);
+					}
 				}
 				quatBuf.loadIdentity();
 				oscArgs.clear();
@@ -201,28 +221,40 @@ public class VMCHandler implements OSCHandler {
 
 				// Add Unity humanoid bones transforms
 				for (UnityBone bone : UnityBone.values) {
-					if (bone.boneType.isPresent()) {
-						BoneType boneType = bone.boneType.get();
-//						vecBuf
-//							.set(
-//								skeleton
-//									.getLocalBoneTranslationFromRoot(
-//										boneType,
-//										BoneType.HIP,
-//										true
-//									)
-//							);
+					BoneInfo boneInfo = skeleton
+						.getBoneInfoForBodyPart(
+							bone.bodyPart
+						);
+					if (boneInfo != null) {
+						vecBuf
+							.set(
+								boneInfo
+									.getLocalBoneTranslationFromRoot(
+										skeleton
+											.getBoneInfoForBodyPart(
+												BodyPart.HIP // FIXME hip is not
+																// added if no
+																// spine
+											),
+										true
+									)
+							);
 						vecBuf.zero();
 						quatBuf
 							.set(
-								skeleton
-									.getLocalBoneRotationFromRoot(boneType, BoneType.HIP, true)
+								boneInfo
+									.getLocalBoneRotationFromRoot(
+										skeleton
+											.getBoneInfoForBodyPart(
+												BodyPart.HIP
+											),
+										true
+									)
 							);
-						// TODO tpose versus npose
-//						if (boneType == BoneType.LEFT_SHOULDER_TAIL)
-//							quatBuf.multLocal(LEFT_SHOULDER_OFFSET);
-//						else if (boneType == BoneType.RIGHT_SHOULDER_TAIL)
-//							quatBuf.multLocal(RIGHT_SHOULDER_OFFSET);
+						if (bone.bodyPart == BodyPart.LEFT_UPPER_ARM)
+							quatBuf.multLocal(LEFT_SHOULDER_OFFSET);
+						else if (bone.bodyPart == BodyPart.RIGHT_UPPER_ARM)
+							quatBuf.multLocal(RIGHT_SHOULDER_OFFSET);
 
 						oscArgs.clear();
 						oscArgs.add(bone.stringVal);
