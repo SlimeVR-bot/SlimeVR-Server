@@ -86,6 +86,19 @@ public class RPCSettingsBuilder {
 			);
 	}
 
+	public static int createDriftCompensationSettings(
+		FlatBufferBuilder fbb,
+		DriftCompensationConfig driftCompensationConfig
+	) {
+		return DriftCompensationSettings
+			.createDriftCompensationSettings(
+				fbb,
+				driftCompensationConfig.getEnabled(),
+				driftCompensationConfig.getAmount(),
+				driftCompensationConfig.getMaxResets()
+			);
+	}
+
 	public static int createTapDetectionSettings(
 		FlatBufferBuilder fbb,
 		TapDetectionConfig tapDetectionConfig
