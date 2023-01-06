@@ -1,5 +1,6 @@
 package dev.slimevr.vr.processor.skeleton;
 
+import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import dev.slimevr.vr.processor.TransformNode;
@@ -17,8 +18,14 @@ public class BoneInfo {
 	// TODO(thebutlah): I don't think `BoneType` should include trackers, so
 	// this might make more sense to be `BodyPart` or something.
 	public final int bodyPart;
+	public final TransformNode headNode;
 	public final TransformNode tailNode;
 	public float length;
+	private static final Quaternion FOOT_OFFSET = Quaternion.X_90_DEG;
+	private static final Quaternion LEFT_SHOULDER_OFFSET = new Quaternion()
+		.fromAngles(0f, 0f, -FastMath.HALF_PI);
+	private static final Quaternion RIGHT_SHOULDER_OFFSET = new Quaternion()
+		.fromAngles(0f, 0f, FastMath.HALF_PI);
 
 	/**
 	 * Creates a `BoneInfo`.
@@ -29,6 +36,7 @@ public class BoneInfo {
 	 */
 	public BoneInfo(int bodyPart, TransformNode tailNode) {
 		this.bodyPart = bodyPart;
+		this.headNode = tailNode.getParent();
 		this.tailNode = tailNode;
 		updateLength();
 	}
@@ -40,28 +48,41 @@ public class BoneInfo {
 		this.length = this.tailNode.localTransform.getTranslation().length();
 	}
 
+	public Vector3f getLocalTranslation(boolean unity) {
+		return tailNode.localTransform.getTranslation();
+	}
+
+	public Vector3f getGlobalTranslation(boolean unity) {
+		return tailNode.worldTransform.getTranslation();
+	}
+
 	// TODO : There shouldn't be edge cases like multiplying
 	// feet by rotation. This is the best solution right now,
 	// or we'd need to store this info on the client, which is
 	// worse. Need to rework the skeleton using new @SkeletonData
 	// system
-	public Quaternion getLocalRotation() {
-		var rot = this.tailNode.getParent().localTransform.getRotation();
-		if (this.bodyPart == BodyPart.LEFT_FOOT || this.bodyPart == BodyPart.RIGHT_FOOT) {
-			rot = rot.mult(Quaternion.X_90_DEG);
-		}
+	public Quaternion getLocalRotation(boolean unity) {
+		Quaternion rot = headNode.localTransform.getRotation();
+		adjustRotation(rot, unity);
 		return rot;
 	}
 
-	public Quaternion getGlobalRotation() {
-		var rot = this.tailNode.getParent().worldTransform.getRotation();
-		if (this.bodyPart == BodyPart.LEFT_FOOT || this.bodyPart == BodyPart.RIGHT_FOOT) {
-			rot = rot.mult(Quaternion.X_90_DEG);
-		}
-		if (this.bodyPart == BodyPart.LEFT_LOWER_ARM || this.bodyPart == BodyPart.RIGHT_LOWER_ARM) {
-			rot = rot.mult(Quaternion.X_180_DEG);
-		}
+	public Quaternion getGlobalRotation(boolean unity) {
+		Quaternion rot = headNode.worldTransform.getRotation();
+		adjustRotation(rot, unity);
 		return rot;
+	}
+
+	private void adjustRotation(Quaternion rot, boolean unity) {
+		if (!unity) {
+			if (this.bodyPart == BodyPart.LEFT_FOOT || this.bodyPart == BodyPart.RIGHT_FOOT)
+				rot.multLocal(FOOT_OFFSET);
+		}
+		// TODO
+		if (this.bodyPart == BodyPart.LEFT_UPPER_ARM)
+			rot.multLocal(LEFT_SHOULDER_OFFSET);
+		if (this.bodyPart == BodyPart.RIGHT_UPPER_ARM)
+			rot.multLocal(RIGHT_SHOULDER_OFFSET);
 	}
 
 	/**
@@ -70,20 +91,13 @@ public class BoneInfo {
 	 * @return The bone's local translation relative to a new root
 	 */
 	public Vector3f getLocalBoneTranslationFromRoot(BoneInfo root, boolean unity) {
-		// FIXME
-		TransformNode towardsNode = getNodeTowards(tailNode, root.tailNode, unity);
-
 		if (this == root) {
-			return new Vector3f().zero();
-		} else if (towardsNode != null) {
-			return tailNode.worldTransform
-				.getTranslation()
-				.subtract(towardsNode.worldTransform.getTranslation());
+			return Vector3f.ZERO;
 		} else {
-			return tailNode.worldTransform
-				.getTranslation()
+			return getGlobalTranslation(unity)
 				.subtract(
-					tailNode.getParent().getParent().worldTransform.getTranslation()
+					getNodeTowards(headNode, root.headNode, unity).worldTransform
+						.getTranslation()
 				);
 		}
 	}
@@ -94,23 +108,15 @@ public class BoneInfo {
 	 * @return The bone's local rotation relative to a new root
 	 */
 	public Quaternion getLocalBoneRotationFromRoot(BoneInfo root, boolean unity) {
-		// FIXME
-		TransformNode towardsNode = getNodeTowards(tailNode, root.tailNode, unity);
 		if (this == root) {
-			return tailNode.worldTransform.getRotation();
-		} else if (towardsNode != null) {
-			return tailNode.worldTransform
-				.getRotation()
-				.mult(towardsNode.worldTransform.getRotation().inverse());
-		} else if (hasInParents(tailNode, root.tailNode)) {
-			return tailNode.worldTransform
-				.getRotation()
-				.mult(
-					tailNode.getParent().getParent().worldTransform.getRotation().inverse()
-				);
+			return headNode.worldTransform.getRotation();
 		} else {
-			return tailNode.localTransform
-				.getRotation();
+			return getGlobalRotation(unity)
+				.mult(
+					getNodeTowards(headNode, root.headNode, unity).worldTransform
+						.getRotation()
+						.inverse()
+				);
 		}
 	}
 
@@ -118,48 +124,59 @@ public class BoneInfo {
 	 * @param from The root of the search
 	 * @param towards The goal of the search
 	 * @param unity Only use bones from Unity's HumanBodyBones
-	 * @return the first child node towards "towards", or null if "towards" is
-	 * not present anywhere in the children of "from".
+	 * @return the first node from "from" towards "towards" or "from" if none
+	 * are found.
 	 */
 	private TransformNode getNodeTowards(
 		TransformNode from,
 		TransformNode towards,
 		boolean unity
 	) {
+		// Search in parents
+		TransformNode searchingNode = from;
+		while (searchingNode.getParent() != null) {
+			searchingNode = searchingNode.getParent();
+			if (searchingNode.getParent() == towards)
+				return from.getParent();
+		}
+
+		// Search in children
 		FastList<TransformNode> searching = new FastList<>(from.children);
 		int i = 0;
 		while (i < searching.size()) {
 			if (searching.get(i).getName().equalsIgnoreCase(towards.getName())) {
 				if (unity) {
-					if (
-						UnityBone
-							.getByBodyPart(
-								BoneType.valueOf(searching.get(i).getParent().getName()).bodyPart
-							)
-							!= null
-					) {
-						return searching.get(i);
-					} else {
-						return searching.get(i).getParent();
+					TransformNode secondSearching = searching.get(i);
+					while (secondSearching.getParent() != from) {
+						if (
+							secondSearching.getParent().getParent() != null
+								&& secondSearching.getParent().getParent() == from
+						) {
+							if (
+								UnityBone
+									.getByBodyPart(
+										BoneType
+											.valueOf(secondSearching.getParent().getName()).bodyPart
+									)
+									!= null
+							) {
+								secondSearching = secondSearching.getParent();
+							}
+						} else
+							secondSearching = secondSearching.getParent();
 					}
+					return secondSearching;
 				} else {
-					return searching.get(i);
+					TransformNode secondSearching = searching.get(i).getParent();
+					while (secondSearching.getParent() != from)
+						secondSearching = secondSearching.getParent();
+					return secondSearching;
 				}
 			}
 			searching.addAll(searching.get(i).children);
 			i++;
 		}
-		return null;
-	}
 
-	private boolean hasInParents(TransformNode from, TransformNode towards) {
-		TransformNode searchingNode;
-		searchingNode = from;
-		while (searchingNode.getParent() != null && searchingNode.getParent() != towards) {
-			searchingNode = searchingNode.getParent();
-			if (searchingNode.getParent() == towards)
-				return true;
-		}
-		return false;
+		return from;
 	}
 }

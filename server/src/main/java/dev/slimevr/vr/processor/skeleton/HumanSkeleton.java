@@ -303,63 +303,41 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 		// #endregion
 	}
 
-	/**
-	 * Rebuilds the `currentBoneInfo` list
-	 */
 	protected void resetBones() {
-		currentBoneInfo.clear();
+		allBoneInfo.clear();
+		shareableBoneInfo.clear();
 
+		// Create all bones and add to allBoneInfo
+		for (BoneType boneType : BoneType.values) {
+			TransformNode transformNode = getTailNodeOfBone(boneType);
+			if (transformNode != null)
+				allBoneInfo.add(new BoneInfo(boneType.bodyPart, transformNode));
+		}
+
+		// Add shareable bones to shareableBoneInfo
 		// Head
-		currentBoneInfo.add(new BoneInfo(BoneType.HEAD.bodyPart, getTailNodeOfBone(BoneType.HEAD)));
-		currentBoneInfo.add(new BoneInfo(BoneType.NECK.bodyPart, getTailNodeOfBone(BoneType.NECK)));
+		shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.HEAD.bodyPart));
+		shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.NECK.bodyPart));
 
 		// Spine and legs
 		if (hasSpineTracker || hasLeftLegTracker || hasRightLegTracker || sendAllBones) {
 			// Spine
-			currentBoneInfo
-				.add(new BoneInfo(BoneType.CHEST.bodyPart, getTailNodeOfBone(BoneType.CHEST)));
-			currentBoneInfo
-				.add(new BoneInfo(BoneType.WAIST.bodyPart, getTailNodeOfBone(BoneType.WAIST)));
-			currentBoneInfo
-				.add(new BoneInfo(BoneType.HIP.bodyPart, getTailNodeOfBone(BoneType.HIP)));
+			shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.CHEST.bodyPart));
+			shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.WAIST.bodyPart));
+			shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.HIP.bodyPart));
 
 			// Left leg
 			if (hasLeftLegTracker || sendAllBones) {
 				if (sendAllBones) {
 					// don't send currently
-					currentBoneInfo
-						.add(
-							new BoneInfo(
-								BoneType.LEFT_HIP.bodyPart,
-								getTailNodeOfBone(BoneType.LEFT_HIP)
-							)
-						);
+					shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.LEFT_HIP.bodyPart));
 				}
 
-				currentBoneInfo
-					.add(
-						new BoneInfo(
-							BoneType.LEFT_UPPER_LEG.bodyPart,
-							getTailNodeOfBone(BoneType.LEFT_UPPER_LEG)
-						)
-					);
-
-				currentBoneInfo
-					.add(
-						new BoneInfo(
-							BoneType.LEFT_LOWER_LEG.bodyPart,
-							getTailNodeOfBone(BoneType.LEFT_LOWER_LEG)
-						)
-					);
+				shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.LEFT_UPPER_LEG.bodyPart));
+				shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.LEFT_LOWER_LEG.bodyPart));
 
 				if (leftFootTracker != null || sendAllBones) {
-					currentBoneInfo
-						.add(
-							new BoneInfo(
-								BoneType.LEFT_FOOT.bodyPart,
-								getTailNodeOfBone(BoneType.LEFT_FOOT)
-							)
-						);
+					shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.LEFT_FOOT.bodyPart));
 				}
 			}
 
@@ -367,39 +345,14 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 			if (hasRightLegTracker || sendAllBones) {
 				if (sendAllBones) {
 					// don't send currently
-					currentBoneInfo
-						.add(
-							new BoneInfo(
-								BoneType.RIGHT_HIP.bodyPart,
-								getTailNodeOfBone(BoneType.RIGHT_HIP)
-							)
-						);
+					shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.RIGHT_HIP.bodyPart));
 				}
 
-				currentBoneInfo
-					.add(
-						new BoneInfo(
-							BoneType.RIGHT_UPPER_LEG.bodyPart,
-							getTailNodeOfBone(BoneType.RIGHT_UPPER_LEG)
-						)
-					);
-
-				currentBoneInfo
-					.add(
-						new BoneInfo(
-							BoneType.RIGHT_LOWER_LEG.bodyPart,
-							getTailNodeOfBone(BoneType.RIGHT_LOWER_LEG)
-						)
-					);
+				shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.RIGHT_UPPER_LEG.bodyPart));
+				shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.RIGHT_LOWER_LEG.bodyPart));
 
 				if (rightFootTracker != null || sendAllBones) {
-					currentBoneInfo
-						.add(
-							new BoneInfo(
-								BoneType.RIGHT_FOOT.bodyPart,
-								getTailNodeOfBone(BoneType.RIGHT_FOOT)
-							)
-						);
+					shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.RIGHT_FOOT.bodyPart));
 				}
 			}
 		}
@@ -412,103 +365,43 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 		// Left arm
 		if ((hasLeftArmTracker || leftShoulderTracker != null) && sendAllBones) {
 			// don't send currently
-			currentBoneInfo
-				.add(
-					new BoneInfo(
-						BoneType.LEFT_SHOULDER_TAIL.bodyPart,
-						getTailNodeOfBone(BoneType.LEFT_SHOULDER_TAIL)
-					)
-				);
+			shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.LEFT_SHOULDER_TAIL.bodyPart));
 		}
 		if (hasLeftArmTracker && sendAllBones) {
 			// don't send currently
-			currentBoneInfo
-				.add(
-					new BoneInfo(
-						BoneType.LEFT_UPPER_ARM.bodyPart,
-						getTailNodeOfBone(BoneType.LEFT_UPPER_ARM)
-					)
-				);
+			shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.LEFT_UPPER_ARM.bodyPart));
 		}
 		if (hasLeftArmTracker || sendAllBones) {
-			currentBoneInfo
-				.add(
-					new BoneInfo(
-						BoneType.LEFT_LOWER_ARM.bodyPart,
-						getTailNodeOfBone(BoneType.LEFT_LOWER_ARM)
-					)
-				);
+			shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.LEFT_LOWER_ARM.bodyPart));
 		}
 		if ((hasLeftArmTracker || leftHandTracker != null) && sendAllBones) {
 			// don't send currently
-			currentBoneInfo
-				.add(
-					new BoneInfo(
-						BoneType.LEFT_HAND.bodyPart,
-						getTailNodeOfBone(BoneType.LEFT_HAND)
-					)
-				);
+			shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.LEFT_HAND.bodyPart));
 		}
 		if (leftControllerTracker != null && sendAllBones) {
 			// don't send currently
-			currentBoneInfo
-				.add(
-					new BoneInfo(
-						BoneType.LEFT_CONTROLLER.bodyPart,
-						getTailNodeOfBone(BoneType.LEFT_CONTROLLER)
-					)
-				);
+			shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.LEFT_CONTROLLER.bodyPart));
 		}
 
 		// Right arm
 		if ((hasRightArmTracker || rightShoulderTracker != null) && sendAllBones) {
 			// don't send currently
-			currentBoneInfo
-				.add(
-					new BoneInfo(
-						BoneType.RIGHT_SHOULDER_TAIL.bodyPart,
-						getTailNodeOfBone(BoneType.RIGHT_SHOULDER_TAIL)
-					)
-				);
+			shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.RIGHT_SHOULDER_TAIL.bodyPart));
 		}
 		if (hasRightArmTracker && sendAllBones) {
 			// don't send currently
-			currentBoneInfo
-				.add(
-					new BoneInfo(
-						BoneType.RIGHT_UPPER_ARM.bodyPart,
-						getTailNodeOfBone(BoneType.RIGHT_UPPER_ARM)
-					)
-				);
+			shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.RIGHT_UPPER_ARM.bodyPart));
 		}
 		if (hasRightArmTracker || sendAllBones) {
-			currentBoneInfo
-				.add(
-					new BoneInfo(
-						BoneType.RIGHT_LOWER_ARM.bodyPart,
-						getTailNodeOfBone(BoneType.RIGHT_LOWER_ARM)
-					)
-				);
+			shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.RIGHT_LOWER_ARM.bodyPart));
 		}
 		if ((hasRightArmTracker || rightHandTracker != null) && sendAllBones) {
 			// don't send currently
-			currentBoneInfo
-				.add(
-					new BoneInfo(
-						BoneType.RIGHT_HAND.bodyPart,
-						getTailNodeOfBone(BoneType.RIGHT_HAND)
-					)
-				);
+			shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.RIGHT_HAND.bodyPart));
 		}
 		if (rightControllerTracker != null && sendAllBones) {
 			// don't send currently
-			currentBoneInfo
-				.add(
-					new BoneInfo(
-						BoneType.RIGHT_CONTROLLER.bodyPart,
-						getTailNodeOfBone(BoneType.RIGHT_CONTROLLER)
-					)
-				);
+			shareableBoneInfo.add(getBoneInfoForBodyPart(BoneType.RIGHT_CONTROLLER.bodyPart));
 		}
 	}
 
@@ -1508,7 +1401,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 				break;
 		}
 
-		for (BoneInfo bone : currentBoneInfo) {
+		for (BoneInfo bone : allBoneInfo) {
 			bone.updateLength();
 		}
 	}
@@ -1593,7 +1486,7 @@ public class HumanSkeleton extends Skeleton implements SkeletonConfigCallback {
 
 	@Override
 	public BoneInfo getBoneInfoForBodyPart(int bodyPart) {
-		for (BoneInfo bone : currentBoneInfo) {
+		for (BoneInfo bone : allBoneInfo) {
 			if (bone.bodyPart == bodyPart)
 				return bone;
 		}

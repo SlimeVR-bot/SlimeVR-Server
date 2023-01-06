@@ -4,7 +4,6 @@ import com.illposed.osc.*;
 import com.illposed.osc.messageselector.OSCPatternAddressMessageSelector;
 import com.illposed.osc.transport.OSCPortIn;
 import com.illposed.osc.transport.OSCPortOut;
-import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import dev.slimevr.VRServer;
@@ -41,10 +40,6 @@ public class VMCHandler implements OSCHandler {
 	private int lastPortIn;
 	private int lastPortOut;
 	private InetAddress lastAddress;
-	private static final Quaternion LEFT_SHOULDER_OFFSET = new Quaternion()
-		.fromAngles(0f, 0f, -FastMath.HALF_PI);
-	private static final Quaternion RIGHT_SHOULDER_OFFSET = new Quaternion()
-		.fromAngles(0f, 0f, FastMath.HALF_PI);
 
 	public VMCHandler(
 		VRServer server,
@@ -221,6 +216,7 @@ public class VMCHandler implements OSCHandler {
 
 				// Add Unity humanoid bones transforms
 				for (UnityBone bone : UnityBone.values) {
+					// TODO fix head not rotating
 					BoneInfo boneInfo = skeleton
 						.getBoneInfoForBodyPart(
 							bone.bodyPart
@@ -232,14 +228,11 @@ public class VMCHandler implements OSCHandler {
 									.getLocalBoneTranslationFromRoot(
 										skeleton
 											.getBoneInfoForBodyPart(
-												BodyPart.HIP // FIXME hip is not
-																// added if no
-																// spine
+												BodyPart.HIP
 											),
 										true
 									)
 							);
-						vecBuf.zero();
 						quatBuf
 							.set(
 								boneInfo
@@ -251,11 +244,6 @@ public class VMCHandler implements OSCHandler {
 										true
 									)
 							);
-						if (bone.bodyPart == BodyPart.LEFT_UPPER_ARM)
-							quatBuf.multLocal(LEFT_SHOULDER_OFFSET);
-						else if (bone.bodyPart == BodyPart.RIGHT_UPPER_ARM)
-							quatBuf.multLocal(RIGHT_SHOULDER_OFFSET);
-
 						oscArgs.clear();
 						oscArgs.add(bone.stringVal);
 						oscArgs.add(vecBuf.x);

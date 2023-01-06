@@ -306,7 +306,7 @@ public class DataFeedBuilder {
 			var bi = boneInfos.get(i);
 
 			var headPosG = bi.tailNode.getParent().worldTransform.getTranslation();
-			var rotG = bi.getGlobalRotation();
+			var rotG = bi.getGlobalRotation(false);
 
 			// TODO: figure out why this value is stale, so that we don't need
 			// to recalculate it all the time, since thats not performant.

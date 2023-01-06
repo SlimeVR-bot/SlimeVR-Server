@@ -10,7 +10,8 @@ import java.util.List;
 
 public abstract class Skeleton {
 
-	public final List<BoneInfo> currentBoneInfo = new ArrayList<>();
+	public final List<BoneInfo> allBoneInfo = new ArrayList<>();
+	public final List<BoneInfo> shareableBoneInfo = new ArrayList<>();
 
 	@VRServerThread
 	public abstract void updatePose();
