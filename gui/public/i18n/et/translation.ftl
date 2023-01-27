@@ -107,6 +107,7 @@ widget-overlay-is_mirrored_label = Näita Ülekatet Peeglina
 ## Widget: Developer settings
 
 widget-developer_mode = Arendaja režiim
+widget-developer_mode-high_contrast = testt
 
 ## Widget: IMU Visualizer
 
